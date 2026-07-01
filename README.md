@@ -1,5 +1,3 @@
-Here's the improved `README.md` file, incorporating the new content while maintaining the existing structure and information:
-
 # StockApi
 
 StockApi is a .NET 8 ASP.NET Core Web API that returns a stock's closing price for a specified date. If no date is provided, the API uses the current UTC date. The project follows a layered architecture: Controller ? Provider ? Repository and uses dependency injection and `IHttpClientFactory` for external calls.
@@ -11,8 +9,8 @@ StockApi is a .NET 8 ASP.NET Core Web API that returns a stock's closing price f
 GET `/api/stocks/price`
 
 Query parameters:
-- `ticker` (string, required) — Stock ticker symbol (e.g., `AAPL`, `MSFT`).
-- `date` (ISO 8601 date, optional) — Date to return the closing price for (e.g., `2026-06-18`). If omitted, the server uses `DateTime.UtcNow.Date`.
+- `ticker` (string, required) â€” Stock ticker symbol (e.g., `AAPL`, `MSFT`).
+- `date` (ISO 8601 date, optional) â€” Date to return the closing price for (e.g., `2026-06-18`). If omitted, the server uses `DateTime.UtcNow.Date`.
 
 Examples:
 GET /api/stocks/price?ticker=AAPL
