@@ -2,10 +2,8 @@ using Confluent.Kafka;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using StockApi.Models;
-using StockApi.Providers;
-using StockApi.Repositories;
-using StockApi.Services;
+using OrderApi.Providers;
+using OrderApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,24 +12,19 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Dependency injection for Stock API
-builder.Services.Configure<AlphaVantageOptions>(
-    builder.Configuration.GetSection("AlphaVantage"));
-builder.Services.AddHttpClient<IStockRepository, AVStockRepository>();
-builder.Services.AddScoped<IStockProvider, StockProvider>();
-
-// Dependency injection for Payment/Kafka
+// Kafka configuration
 var kafkaConfig = new ProducerConfig
 {
     BootstrapServers = builder.Configuration["Kafka:BootstrapServers"] ?? "localhost:9092",
-    ClientId = builder.Configuration["Kafka:ClientId"] ?? "SampleAgentCreation-Producer"
+    ClientId = builder.Configuration["Kafka:ClientId"] ?? "OrderApi-Producer"
 };
 
 builder.Services.AddSingleton<IProducer<string, string>>(sp =>
     new ProducerBuilder<string, string>(kafkaConfig).Build());
 
+// Dependency injection for Order/Payment services
 builder.Services.AddScoped<IKafkaProducerService, KafkaProducerService>();
-builder.Services.AddScoped<IPaymentProvider, PaymentProvider>();
+builder.Services.AddScoped<IOrderProvider, OrderProvider>();
 
 var app = builder.Build();
 
