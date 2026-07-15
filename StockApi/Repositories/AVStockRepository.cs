@@ -1,7 +1,11 @@
 ﻿using Microsoft.Extensions.Options;
 using StockApi.Models;
+using System;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace StockApi.Repositories;
 
@@ -11,16 +15,17 @@ public class AVStockRepository : IStockRepository
     private readonly AlphaVantageOptions _options;
 
     public AVStockRepository(
-    HttpClient httpClient,
-    IOptions<AlphaVantageOptions> options)
+        HttpClient httpClient,
+        IOptions<AlphaVantageOptions> options)
     {
         _httpClient = httpClient;
         _options = options.Value;
     }
 
-    public async Task<StockPriceResponse> GetStockPriceAsync(
-    string ticker,
-    DateTime date)
+    public async Task<StockPriceResponse?> GetStockPriceAsync(
+        string ticker,
+        DateTime date,
+        CancellationToken cancellationToken = default)
     {
         var url =
             $"https://www.alphavantage.co/query" +
@@ -28,11 +33,17 @@ public class AVStockRepository : IStockRepository
             $"&symbol={ticker}" +
             $"&apikey={_options.ApiKey}";
 
-        var response =
-            await _httpClient.GetStringAsync(url);
+        using var response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
         using var document =
-            JsonDocument.Parse(response);
+            JsonDocument.Parse(responseString);
 
         var root = document.RootElement;
 
@@ -69,8 +80,8 @@ public class AVStockRepository : IStockRepository
         }
 
         var dayData =
-        timeSeries.GetProperty(
-            actualDate.ToString("yyyy-MM-dd"));
+            timeSeries.GetProperty(
+                actualDate.ToString("yyyy-MM-dd"));
 
         var closePrice =
             decimal.Parse(

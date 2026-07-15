@@ -12,6 +12,6 @@ namespace StockApi.Providers
         /// </summary>
         /// <param name="request">Stock price request containing ticker and optional date.</param>
         /// <returns>Stock price response for the effective date.</returns>
-        Task<StockPriceResponse> GetStockPriceAsync(StockPriceRequest request);
+        Task<StockPriceResponse> GetStockPriceAsync(StockPriceRequest request, CancellationToken cancellationToken);
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Globalization;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using StockApi.Models;
 
@@ -20,7 +21,7 @@ namespace StockApi.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<StockPriceResponse?> GetStockPriceAsync(string ticker, DateTime date)
+        public async Task<StockPriceResponse?> GetStockPriceAsync(string ticker, DateTime date, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(ticker))
             {
@@ -33,7 +34,7 @@ namespace StockApi.Repositories
 
             var requestUri = $"v8/finance/chart/{Uri.EscapeDataString(ticker)}?period1={period1Utc}&period2={period2Utc}&interval=1d";
 
-            using var response = await _httpClient.GetAsync(requestUri).ConfigureAwait(false);
+            using var response = await _httpClient.GetAsync(requestUri, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {

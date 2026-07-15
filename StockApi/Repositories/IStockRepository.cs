@@ -14,6 +14,6 @@ namespace StockApi.Repositories
         /// <param name="ticker">Ticker symbol (e.g., AAPL).</param>
         /// <param name="date">Date (UTC date) for which to retrieve the closing price.</param>
         /// <returns>StockPriceResponse or null when data isn't available.</returns>
-        Task<StockPriceResponse?> GetStockPriceAsync(string ticker, DateTime date);
+        Task<StockPriceResponse?> GetStockPriceAsync(string ticker, DateTime date, CancellationToken cancellationToken);
     }
 }

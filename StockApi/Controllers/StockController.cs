@@ -1,6 +1,6 @@
-//csharp StockApi/Controllers/StockController.cs
 #nullable enable
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using StockApi.Models;
@@ -24,9 +24,10 @@ namespace StockApi.Controllers
         /// </summary>
         /// <param name="ticker">Ticker symbol (required).</param>
         /// <param name="date">Optional date in YYYY-MM-DD format.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Stock price information or appropriate HTTP error.</returns>
         [HttpGet("price")]
-        public async Task<IActionResult> GetPrice([FromQuery] string? ticker, [FromQuery] DateTime? date)
+        public async Task<IActionResult> GetPrice([FromQuery] string? ticker, [FromQuery] DateTime? date, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(ticker))
             {
@@ -41,7 +42,7 @@ namespace StockApi.Controllers
 
             try
             {
-                var response = await _provider.GetStockPriceAsync(request).ConfigureAwait(false);
+                var response = await _provider.GetStockPriceAsync(request, cancellationToken).ConfigureAwait(false);
                 return Ok(response);
             }
             catch (ArgumentException ae)

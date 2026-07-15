@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;
@@ -21,7 +22,7 @@ namespace StockApi.Tests.Providers
             var expected = new StockPriceResponse { Ticker = ticker, Date = date, ClosePrice = 612.41M };
 
             var repoMock = new Mock<IStockRepository>();
-            repoMock.Setup(r => r.GetStockPriceAsync(ticker, date))
+            repoMock.Setup(r => r.GetStockPriceAsync(ticker, date, It.IsAny<CancellationToken>()))
                     .ReturnsAsync(expected);
 
             var provider = new StockProvider(repoMock.Object);
@@ -33,7 +34,7 @@ namespace StockApi.Tests.Providers
             // Assert
             Assert.Equal(expected.Ticker, result.Ticker);
             Assert.Equal(expected.ClosePrice, result.ClosePrice);
-            repoMock.Verify(r => r.GetStockPriceAsync(ticker, date), Times.Once);
+            repoMock.Verify(r => r.GetStockPriceAsync(ticker, date, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -46,7 +47,7 @@ namespace StockApi.Tests.Providers
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentException>(() => provider.GetStockPriceAsync(request));
-            repoMock.Verify(r => r.GetStockPriceAsync(It.IsAny<string>(), It.IsAny<DateTime>()), Times.Never);
+            repoMock.Verify(r => r.GetStockPriceAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -57,14 +58,14 @@ namespace StockApi.Tests.Providers
             var date = new DateTime(2026, 6, 18);
 
             var repoMock = new Mock<IStockRepository>();
-            repoMock.Setup(r => r.GetStockPriceAsync(ticker, date)).ReturnsAsync((StockPriceResponse?)null);
+            repoMock.Setup(r => r.GetStockPriceAsync(ticker, date, It.IsAny<CancellationToken>())).ReturnsAsync((StockPriceResponse?)null);
 
             var provider = new StockProvider(repoMock.Object);
             var request = new StockPriceRequest { Ticker = ticker, Date = date };
 
             // Act & Assert
             await Assert.ThrowsAsync<KeyNotFoundException>(() => provider.GetStockPriceAsync(request));
-            repoMock.Verify(r => r.GetStockPriceAsync(ticker, date), Times.Once);
+            repoMock.Verify(r => r.GetStockPriceAsync(ticker, date, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -75,8 +76,8 @@ namespace StockApi.Tests.Providers
             DateTime? capturedDate = null;
 
             var repoMock = new Mock<IStockRepository>();
-            repoMock.Setup(r => r.GetStockPriceAsync(It.IsAny<string>(), It.IsAny<DateTime>()))
-                    .Callback<string, DateTime>((t, d) => capturedDate = d)
+            repoMock.Setup(r => r.GetStockPriceAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+                    .Callback<string, DateTime, CancellationToken>((t, d, ct) => capturedDate = d)
                     .ReturnsAsync(new StockPriceResponse { Ticker = ticker, Date = DateTime.UtcNow.Date, ClosePrice = 1M });
 
             var provider = new StockProvider(repoMock.Object);
@@ -88,7 +89,7 @@ namespace StockApi.Tests.Providers
             // Assert
             Assert.NotNull(capturedDate);
             Assert.Equal(DateTime.UtcNow.Date, capturedDate!.Value.Date);
-            repoMock.Verify(r => r.GetStockPriceAsync(ticker, It.IsAny<DateTime>()), Times.Once);
+            repoMock.Verify(r => r.GetStockPriceAsync(ticker, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

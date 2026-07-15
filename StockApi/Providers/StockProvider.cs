@@ -1,6 +1,6 @@
-
 #nullable enable
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using StockApi.Models;
 using StockApi.Repositories;
@@ -17,22 +17,25 @@ namespace StockApi.Providers
         }
 
         /// <inheritdoc />
-        public async Task<StockPriceResponse> GetStockPriceAsync(StockPriceRequest request)
+        public async Task<StockPriceResponse> GetStockPriceAsync(StockPriceRequest request, CancellationToken cancellationToken = default)
         {
-            if (request is null)
+            ArgumentNullException.ThrowIfNull(request);
+
+            var ticker = request.Ticker;
+            if (ticker is null)
             {
-                throw new ArgumentNullException(nameof(request));
+                throw new ArgumentException("Ticker is required.", nameof(request.Ticker));
             }
 
-            var ticker = request.Ticker?.Trim();
-            if (string.IsNullOrWhiteSpace(ticker))
+            ticker = ticker.Trim();
+            if (ticker.Length == 0)
             {
                 throw new ArgumentException("Ticker is required.", nameof(request.Ticker));
             }
 
             var effectiveDate = request.Date?.Date ?? DateTime.UtcNow.Date;
 
-            var result = await _repository.GetStockPriceAsync(ticker, effectiveDate).ConfigureAwait(false);
+            var result = await _repository.GetStockPriceAsync(ticker, effectiveDate, cancellationToken).ConfigureAwait(false);
 
             if (result is null)
             {
