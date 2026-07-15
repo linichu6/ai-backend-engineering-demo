@@ -9,7 +9,8 @@ StockApi is a .NET 8 ASP.NET Core Web API that returns a stock's closing price f
                    │
         ┌──────────┴──────────┐
         ▼                     ▼
-   Memory Cache         Stock Repository
+        Memory Cache         Stock Repository
+   
                                │
                                ▼
                         Alpha Vantage API
