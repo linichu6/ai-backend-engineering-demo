@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using StockApi.Models;
 using StockApi.Providers;
 using StockApi.Repositories;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +15,17 @@ builder.Services.Configure<AlphaVantageOptions>(
     builder.Configuration.GetSection("AlphaVantage"));
 builder.Services.AddHttpClient<IStockRepository, AVStockRepository>();
 builder.Services.AddScoped<IStockProvider, StockProvider>();
+
+// log
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "logs/log-.txt",
+        rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 
