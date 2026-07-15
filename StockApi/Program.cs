@@ -15,6 +15,7 @@ builder.Services.Configure<AlphaVantageOptions>(
     builder.Configuration.GetSection("AlphaVantage"));
 builder.Services.AddHttpClient<IStockRepository, AVStockRepository>();
 builder.Services.AddScoped<IStockProvider, StockProvider>();
+builder.Services.AddMemoryCache();
 
 // log
 Log.Logger = new LoggerConfiguration()
