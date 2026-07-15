@@ -16,6 +16,8 @@ builder.Services.Configure<AlphaVantageOptions>(
 builder.Services.AddHttpClient<IStockRepository, AVStockRepository>();
 builder.Services.AddScoped<IStockProvider, StockProvider>();
 builder.Services.AddMemoryCache();
+builder.Services.AddHealthChecks();
+
 
 // log
 Log.Logger = new LoggerConfiguration()
@@ -40,5 +42,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
