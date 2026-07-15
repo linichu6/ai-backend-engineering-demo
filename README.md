@@ -2,6 +2,18 @@
 
 StockApi is a .NET 8 ASP.NET Core Web API that returns a stock's closing price for a specified date. If no date is provided, the API uses the current UTC date. The project follows a layered architecture: Controller ? Provider ? Repository and uses dependency injection and `IHttpClientFactory` for external calls.
 
+                Client
+                   │
+                   ▼
+          ASP.NET Core API
+                   │
+        ┌──────────┴──────────┐
+        ▼                     ▼
+   Memory Cache         Stock Repository
+                               │
+                               ▼
+                        Alpha Vantage API
+
 ## API Contract
 
 ### Endpoint
