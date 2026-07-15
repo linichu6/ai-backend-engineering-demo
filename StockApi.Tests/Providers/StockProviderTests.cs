@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Logging;
 using StockApi.Models;
 using StockApi.Providers;
 using StockApi.Repositories;
@@ -25,7 +26,8 @@ namespace StockApi.Tests.Providers
             repoMock.Setup(r => r.GetStockPriceAsync(ticker, date, It.IsAny<CancellationToken>()))
                     .ReturnsAsync(expected);
 
-            var provider = new StockProvider(repoMock.Object);
+            var loggerMock = new Mock<ILogger<StockProvider>>();
+            var provider = new StockProvider(repoMock.Object, loggerMock.Object);
             var request = new StockPriceRequest { Ticker = ticker, Date = date };
 
             // Act
@@ -42,7 +44,8 @@ namespace StockApi.Tests.Providers
         {
             // Arrange
             var repoMock = new Mock<IStockRepository>();
-            var provider = new StockProvider(repoMock.Object);
+            var loggerMock = new Mock<ILogger<StockProvider>>();
+            var provider = new StockProvider(repoMock.Object, loggerMock.Object);
             var request = new StockPriceRequest { Ticker = " " };
 
             // Act & Assert
@@ -60,7 +63,8 @@ namespace StockApi.Tests.Providers
             var repoMock = new Mock<IStockRepository>();
             repoMock.Setup(r => r.GetStockPriceAsync(ticker, date, It.IsAny<CancellationToken>())).ReturnsAsync((StockPriceResponse?)null);
 
-            var provider = new StockProvider(repoMock.Object);
+            var loggerMock = new Mock<ILogger<StockProvider>>();
+            var provider = new StockProvider(repoMock.Object, loggerMock.Object);
             var request = new StockPriceRequest { Ticker = ticker, Date = date };
 
             // Act & Assert
@@ -80,7 +84,8 @@ namespace StockApi.Tests.Providers
                     .Callback<string, DateTime, CancellationToken>((t, d, ct) => capturedDate = d)
                     .ReturnsAsync(new StockPriceResponse { Ticker = ticker, Date = DateTime.UtcNow.Date, ClosePrice = 1M });
 
-            var provider = new StockProvider(repoMock.Object);
+            var loggerMock = new Mock<ILogger<StockProvider>>();
+            var provider = new StockProvider(repoMock.Object, loggerMock.Object);
             var request = new StockPriceRequest { Ticker = ticker, Date = null };
 
             // Act

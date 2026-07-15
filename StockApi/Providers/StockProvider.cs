@@ -2,6 +2,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using StockApi.Models;
 using StockApi.Repositories;
 
@@ -10,10 +11,12 @@ namespace StockApi.Providers
     public class StockProvider : IStockProvider
     {
         private readonly IStockRepository _repository;
+        private readonly ILogger<StockProvider> _logger;
 
-        public StockProvider(IStockRepository repository)
+        public StockProvider(IStockRepository repository, ILogger<StockProvider> logger)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <inheritdoc />
@@ -35,14 +38,28 @@ namespace StockApi.Providers
 
             var effectiveDate = request.Date?.Date ?? DateTime.UtcNow.Date;
 
-            var result = await _repository.GetStockPriceAsync(ticker, effectiveDate, cancellationToken).ConfigureAwait(false);
-
-            if (result is null)
+            try
             {
-                throw new KeyNotFoundException($"Ticker '{ticker}' not found for date {effectiveDate:yyyy-MM-dd}.");
-            }
+                var result = await _repository.GetStockPriceAsync(ticker, effectiveDate, cancellationToken).ConfigureAwait(false);
 
-            return result;
+                if (result is null)
+                {
+                    _logger.LogWarning("Ticker '{Ticker}' not found for date {Date}.", ticker, effectiveDate.ToString("yyyy-MM-dd"));
+                    throw new KeyNotFoundException($"Ticker '{ticker}' not found for date {effectiveDate:yyyy-MM-dd}.");
+                }
+
+                return result;
+            }
+            catch (OperationCanceledException)
+            {
+                // Cancellation is cooperative; don't log as error.
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to retrieve stock price for {Ticker}", ticker);
+                throw;
+            }
         }
     }
 }

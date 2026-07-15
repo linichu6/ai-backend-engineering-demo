@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace StockApi.Repositories;
 
@@ -13,13 +14,16 @@ public class AVStockRepository : IStockRepository
 {
     private readonly HttpClient _httpClient;
     private readonly AlphaVantageOptions _options;
+    private readonly ILogger<AVStockRepository> _logger;
 
     public AVStockRepository(
         HttpClient httpClient,
-        IOptions<AlphaVantageOptions> options)
+        IOptions<AlphaVantageOptions> options,
+        ILogger<AVStockRepository> logger)
     {
         _httpClient = httpClient;
         _options = options.Value;
+        _logger = logger;
     }
 
     public async Task<StockPriceResponse?> GetStockPriceAsync(
@@ -87,6 +91,12 @@ public class AVStockRepository : IStockRepository
             decimal.Parse(
                 dayData.GetProperty("4. close")
                        .GetString()!);
+
+        _logger.LogInformation(
+            "Ticker '{Ticker}' found for date {Date}: Close price {ClosePrice}.",
+            ticker.ToUpper(),
+            actualDate.Date.ToString("yyyy-MM-dd"),
+            closePrice);
 
         return new StockPriceResponse
         {
