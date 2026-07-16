@@ -81,7 +81,7 @@ namespace StockApi.Providers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to retrieve stock price for {Ticker}", ticker);
+                _logger.LogError(ex, "Failed to retrieve stock price for {Ticker} on {Date}", ticker, effectiveDate.ToString("yyyy-MM-dd"));
                 throw;
             }
         }

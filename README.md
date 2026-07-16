@@ -107,6 +107,59 @@ dotnet test ./StockApi.Tests
 
 This project uses the Yahoo Finance Chart API. The repository converts the requested date to Unix timestamps (seconds), calls the v8 chart endpoint with `interval=1d`, and extracts the `indicators.quote[0].close` value for the requested date.
 
+## AWS ECS Deployment (Fargate)
+
+Add the following task definition snippet and CloudWatch Logs configuration when deploying this service to AWS ECS (Fargate).
+
+- Launch type: Fargate
+- OS: Linux
+- Container port: 8080
+- Health endpoint: `/health`
+- Logs: CloudWatch Logs (awslogs driver)
+
+### Usage notes:
+- Set `ASPNETCORE_ENVIRONMENT=Production` in the task definition environment variables.
+- Ensure the ALB target group health check is set to `HTTP:8080/health`.
+- Configure the task IAM role and security groups according to your environment.
+
+Add the JSON task definition snippet below to your deployment repository or use it as a starting point in the ECS Console.
+
+```json
+{
+  "family": "StockApi",
+  "containerDefinitions": [
+    {
+      "name": "StockApi",
+      "image": "your-docker-image",
+      "memory": 512,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "ASPNETCORE_ENVIRONMENT",
+          "value": "Production"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/StockApi",
+          "awslogs-region": "your-region",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
+```
+
 ## Contributing
 
 Follow the existing coding standards: use async/await, constructor injection, nullable reference types, and XML comments on public methods. Unit tests should use xUnit and Moq.
@@ -115,4 +168,4 @@ Follow the existing coding standards: use async/await, constructor injection, nu
 
 Project is provided as sample code.
 
-This version maintains the original structure while enhancing clarity and coherence, ensuring that all necessary information is presented in a logical flow.
+This version maintains the original structure while enhancing clarity and coherence, ensuring that all necessary information is presented in a logical flow. The new AWS ECS Deployment section has been seamlessly integrated into the document.
