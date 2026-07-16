@@ -15,6 +15,7 @@ public class AVStockRepository : IStockRepository
     private readonly HttpClient _httpClient;
     private readonly AlphaVantageOptions _options;
     private readonly ILogger<AVStockRepository> _logger;
+    private readonly string _apiKey;
 
     public AVStockRepository(
         HttpClient httpClient,
@@ -24,6 +25,7 @@ public class AVStockRepository : IStockRepository
         _httpClient = httpClient;
         _options = options.Value;
         _logger = logger;
+        _apiKey = options.Value.ApiKey; // populated from appsettings, environment, or user-secrets (dev)
     }
 
     public async Task<StockPriceResponse?> GetStockPriceAsync(
