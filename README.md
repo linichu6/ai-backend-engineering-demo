@@ -18,6 +18,10 @@ StockApi is a .NET 8 ASP.NET Core Web API that returns a stock's closing price f
 ## API Contract
 
 ### Endpoint
+| Endpoint  | Description               |
+| --------- | ------------------------- |
+| `/health` | Returns API health status |
+
 
 GET `/api/stocks/price`
 
